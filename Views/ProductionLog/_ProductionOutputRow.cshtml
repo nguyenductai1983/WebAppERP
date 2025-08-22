@@ -1,0 +1,56 @@
+﻿@* File: Views/ProductionLog/_ProductionOutputRow.cshtml *@
+@model WebAppERP.ViewModels.ProductionOutputViewModel
+@{
+    // Lấy index và thông tin công đoạn từ ViewData
+    var index = (int)ViewData["index"];
+    var stageName = ViewData["StageName"] as string;
+}
+
+<div class="card p-3 mb-3 output-row">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <strong>Sản phẩm đầu ra #@(index + 1)</strong>
+        @if (index > 0)
+        {
+            <button type="button" class="btn btn-sm btn-outline-danger remove-output-btn">Xóa</button>
+        }
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="@Model.Quantity" class="form-label"></label>
+            @* Quan trọng: Dùng name attribute để binding chính xác vào danh sách Outputs *@
+            <input type="number" name="Outputs[@index].Quantity" value="@Model.Quantity" class="form-control" />
+            <span asp-validation-for="@Model.Quantity" class="text-danger"></span>
+        </div>
+    </div>
+
+    @* Hiển thị các ô nhập liệu đặc thù DỰA VÀO TÊN CÔNG ĐOẠN *@
+    <div class="row">
+        @if (stageName == "Đùn Sợi")
+        {
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Trọng lượng NW (kg)</label>
+                <input type="number" step="0.01" name="Outputs[@index].Attributes[NetWeight]" class="form-control" required />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Trọng lượng GW (kg)</label>
+                <input type="number" step="0.01" name="Outputs[@index].Attributes[GrossWeight]" class="form-control" required />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Số ống sợi</label>
+                <input type="number" name="Outputs[@index].Attributes[SpoolCount]" class="form-control" required />
+            </div>
+        }
+        else if (stageName == "Dệt")
+        {
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Chiều dài (mét)</label>
+                <input type="number" step="0.01" name="Outputs[@index].Attributes[Length]" class="form-control" required />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Khổ rộng (mét)</label>
+                <input type="number" step="0.01" name="Outputs[@index].Attributes[Width]" class="form-control" required />
+            </div>
+        }
+    </div>
+</div>

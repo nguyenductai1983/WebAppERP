@@ -1,0 +1,194 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - MHTG ERP</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    @using Microsoft.AspNetCore.Identity
+    @inject SignInManager<IdentityUser> SignInManager
+    @inject UserManager<IdentityUser> UserManager
+    <header>
+        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"><i class="bi bi-box-seam-fill me-2"></i>MHTG ERP</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                    <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Profile" asp-action="Index"><i class="bi bi-person-badge me-2"></i>Hồ sơ của tôi</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="LeaveRequests" asp-action="Index"><i class="bi bi-calendar-check me-2"></i>Đơn nghỉ phép</a>
+                            </li>
+                        }
+                    </ul>
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container-fluid">
+        <div class="row">
+            @if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+            {
+                var activeGroup = ViewData["ActiveMenuGroup"] as string ?? "";
+
+                <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                    <div class="position-sticky pt-3 sidebar-sticky">
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link @(string.IsNullOrEmpty(activeGroup) ? "active" : "")" asp-controller="Home" asp-action="Index">
+                                    <i class="bi bi-house-door-fill me-2"></i>Trang chủ
+                                </a>
+                            </li>
+
+                            <!-- =================== NHÓM TÁC NGHIỆP =================== -->
+                            <li class="sidebar-heading px-3 mt-4 mb-1 text-muted">TÁC NGHIỆP</li>
+
+                            <!-- Menu Bán Hàng -->
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="collapse" href="#salesSubmenu" role="button">
+                                    <i class="bi bi-cart-check-fill me-2"></i>Bán hàng
+                                </a>
+                                <div class="collapse @(activeGroup == "Sales" ? "show" : "")" id="salesSubmenu">
+                                    <ul class="nav flex-column ms-3">
+                                        <li class="nav-item"><a class="nav-link py-1" asp-controller="SalesOrders" asp-action="Index">Đơn bán hàng</a></li>
+                                        <!-- MỤC MENU MỚI ĐƯỢC THÊM VÀO -->
+                                        <li class="nav-item"><a class="nav-link py-1" asp-controller="Shipments" asp-action="Index">Chờ Xuất Kho</a></li>
+                                        <li class="nav-item"><a class="nav-link py-1" asp-controller="Customers" asp-action="Index">Khách hàng</a></li>
+                                    </ul>
+                                </div>
+                            </li>
+
+                            <!-- Menu Mua Hàng -->
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="collapse" href="#purchaseSubmenu" role="button">
+                                    <i class="bi bi-truck me-2"></i>Mua hàng
+                                </a>
+                                <div class="collapse @(activeGroup == "Purchase" ? "show" : "")" id="purchaseSubmenu">
+                                    <ul class="nav flex-column ms-3">
+                                        <li class="nav-item"><a class="nav-link py-1" asp-controller="PurchaseOrders" asp-action="Index">Đơn mua hàng</a></li>
+                                        <li class="nav-item"><a class="nav-link py-1" asp-controller="Suppliers" asp-action="Index">Nhà cung cấp</a></li>
+                                    </ul>
+                                </div>
+                            </li>
+
+                            <!-- Menu Sản Xuất -->
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="collapse" href="#productionSubmenu" role="button">
+                                    <i class="bi bi-tools me-2"></i>Sản xuất
+                                </a>
+                                <div class="collapse @(activeGroup == "Production" ? "show" : "")" id="productionSubmenu">
+                                    <ul class="nav flex-column ms-3">
+                                        <li class="nav-item"><a class="nav-link py-1" asp-controller="ProductionPlanning" asp-action="Index">Hoạch định Sản xuất</a></li>
+                                        <li class="nav-item"><a class="nav-link py-1" asp-controller="WorkOrders" asp-action="Index">Lệnh sản xuất</a></li>
+                                        <li class="nav-item"><a class="nav-link py-1" asp-controller="Reports" asp-action="Index">Ghi nhận Sản lượng</a></li>
+                                        <li class="nav-item"><a class="nav-link py-1" asp-controller="MRP" asp-action="Index">Báo cáo Nhu cầu NVL</a></li>
+                                    </ul>
+                                </div>
+                            </li>
+
+                            <!-- Menu Kho Vận -->
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="collapse" href="#warehouseSubmenu" role="button">
+                                    <i class="bi bi-box-seam me-2"></i>Kho Vận
+                                </a>
+                                <div class="collapse @(activeGroup == "Warehouse" ? "show" : "")" id="warehouseSubmenu">
+                                    <ul class="nav flex-column ms-3">
+                                        <li class="nav-item"><a class="nav-link py-1" asp-controller="Products" asp-action="RawMaterialsIndex">Tồn kho NVL</a></li>
+                                        <li class="nav-item"><a class="nav-link py-1" asp-controller="MaterialIssues" asp-action="Index">Xuất kho cho Sản xuất</a></li>
+                                        <!-- Thêm link xem lịch sử kho sau này -->
+                                        <!-- <li class="nav-item"><a class="nav-link py-1" asp-controller="Inventory" asp-action="Index">Lịch sử Giao dịch Kho</a></li> -->
+                                    </ul>
+                                </div>
+                            </li>
+
+                            <!-- =================== NHÓM QUẢN LÝ =================== -->
+                            <li class="sidebar-heading px-3 mt-4 mb-1 text-muted">QUẢN LÝ</li>
+
+                            <!-- Menu Nhân Sự -->
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="collapse" href="#hrSubmenu" role="button">
+                                    <i class="bi bi-people-fill me-2"></i><span>Nhân sự</span>
+                                    @await Component.InvokeAsync("PendingLeaveCount")
+                                </a>
+                                <div class="collapse @(activeGroup == "HR" ? "show" : "")" id="hrSubmenu">
+                                    <ul class="nav flex-column ms-3">
+                                        <li class="nav-item"><a class="nav-link py-1" asp-controller="Employees" asp-action="Index">QL Nhân viên</a></li>
+                                        <li class="nav-item">
+                                            <a class="nav-link py-1" asp-controller="LeaveManagement" asp-action="Index">
+                                                <span>Duyệt đơn nghỉ phép</span>
+                                                @await Component.InvokeAsync("PendingLeaveCount")
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+
+                            <!-- Menu Kế Toán -->
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="collapse" href="#accountingSubmenu" role="button">
+                                    <i class="bi bi-bank me-2"></i>Kế toán
+                                </a>
+                                <div class="collapse @(activeGroup == "Accounting" ? "show" : "")" id="accountingSubmenu">
+                                    <ul class="nav flex-column ms-3">
+                                        <li class="nav-item"><a class="nav-link py-1" asp-controller="JournalEntries" asp-action="Index">Nhật ký chung</a></li>
+                                        <li class="nav-item"><a class="nav-link py-1" asp-controller="Accounts" asp-action="Index">Hệ thống Tài khoản</a></li>
+                                    </ul>
+                                </div>
+                            </li>
+
+                            <!-- =================== NHÓM HỆ THỐNG =================== -->
+                            <li class="sidebar-heading px-3 mt-4 mb-1 text-muted">HỆ THỐNG</li>
+
+                            <!-- Menu Dữ liệu Gốc (Thiết lập) -->
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="collapse" href="#masterDataSubmenu" role="button">
+                                    <i class="bi bi-archive-fill me-2"></i>Thiết lập Dữ liệu
+                                </a>
+                                <div class="collapse @(activeGroup == "MasterData" ? "show" : "")" id="masterDataSubmenu">
+                                    <ul class="nav flex-column ms-3">
+                                        <li class="nav-item"><a class="nav-link py-1" asp-controller="Products" asp-action="Index">QL Sản phẩm</a></li>
+                                        <li class="nav-item"><a class="nav-link py-1" asp-controller="ProductionStages" asp-action="Index">QL Công đoạn</a></li>
+                                        <li class="nav-item"><a class="nav-link py-1" asp-controller="Machines" asp-action="Index">QL Máy móc</a></li>
+                                        <li class="nav-item"><a class="nav-link py-1" asp-controller="Workshops" asp-action="Index">QL Phân xưởng</a></li>
+                                        <li class="nav-item"><a class="nav-link py-1" asp-controller="Colors" asp-action="Index">QL Màu sắc</a></li>
+                                    </ul>
+                                </div>
+                            </li>
+
+                            <!-- Menu Quản trị User -->
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Index">
+                                    <i class="bi bi-person-fill-gear me-2"></i>Quản lý User
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            }
+
+            <main role="main" class="main-content @(User.IsInRole("Admin") ? "col-md-9 ms-sm-auto col-lg-10 px-md-4" : "col-12")">
+                <div class="pt-3">
+                    @RenderBody()
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

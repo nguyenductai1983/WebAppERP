@@ -1,0 +1,6 @@
+﻿@model int
+@* Chỉ hiển thị huy hiệu nếu số lượng lớn hơn 0 *@
+@if (Model > 0)
+{
+    <span class="badge bg-danger ms-2">@Model</span>
+}

@@ -1,0 +1,28 @@
+﻿@model IEnumerable<WebAppERP.Models.ProductionStage>
+
+@{
+    ViewData["Title"] = "Trung tâm Ghi nhận Sản lượng";
+}
+
+<h1 class="display-6">@ViewData["Title"]</h1>
+<p class="text-muted">Chọn một công đoạn để xem danh sách các Lệnh sản xuất đang chờ và bắt đầu ghi nhận sản lượng.</p>
+<hr />
+
+<div class="row">
+    @foreach (var stage in Model)
+    {
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title"><i class="bi bi-gear-wide-connected me-2"></i> @stage.Name</h5>
+                    <p class="card-text">Xem và quản lý các lệnh sản xuất đang hoạt động cho công đoạn này.</p>
+                    <div class="mt-auto pt-2">
+                        <a asp-controller="WorkOrders" asp-action="Index" asp-route-productionStageId="@stage.Id" class="btn btn-primary">
+                            Xem Lệnh sản xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

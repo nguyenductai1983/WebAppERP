@@ -1,0 +1,38 @@
+﻿@model IEnumerable<WebAppERP.ViewModels.MaterialShortageViewModel>
+
+@{
+    ViewData["Title"] = "Báo cáo Thiếu hụt Nguyên vật liệu";
+}
+
+<h1 class="display-6">@ViewData["Title"]</h1>
+<p class="text-muted">Danh sách các Nguyên vật liệu thô đang có tồn kho âm và cần được đặt hàng.</p>
+<hr />
+
+<table class="table table-sm table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.Sku)</th>
+            <th>@Html.DisplayNameFor(model => model.ProductName)</th>
+            <th>@Html.DisplayNameFor(model => model.UnitOfMeasure)</th>
+            <th class="text-danger text-end">@Html.DisplayNameFor(model => model.CurrentStock)</th>
+            <th class="text-success text-end">@Html.DisplayNameFor(model => model.RequiredToOrder)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Sku</td>
+                <td>@item.ProductName</td>
+                <td>@item.UnitOfMeasure</td>
+                <td class="text-danger text-end fw-bold">@item.CurrentStock.ToString("N2")</td>
+                <td class="text-success text-end fw-bold">@item.RequiredToOrder.ToString("N2")</td>
+                <td>
+                    @* Nút này có thể dẫn đến trang Tạo Đơn Mua hàng trong tương lai *@
+                    <a asp-controller="PurchaseOrders" asp-action="Create" class="btn btn-sm btn-primary">Tạo Đơn Mua hàng</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,76 @@
+﻿@model WebAppERP.Models.PurchaseOrder
+@{ Layout = null; }
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Phiếu Nhập Kho #@Model.Id</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        .receipt-box {
+            max-width: 800px;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #eee;
+        }
+
+        h1 {
+            font-size: 24px;
+        }
+
+        table {
+            width: 100%;
+            line-height: inherit;
+            text-align: left;
+            border-collapse: collapse;
+        }
+
+            table td {
+                padding: 5px;
+                vertical-align: top;
+            }
+
+            table tr.heading td {
+                background: #eee;
+                border-bottom: 1px solid #ddd;
+                font-weight: bold;
+            }
+
+            table tr.total td {
+                border-top: 2px solid #eee;
+                font-weight: bold;
+            }
+    </style>
+</head>
+<body>
+    <div class="receipt-box">
+        <h1>Phiếu Nhập Kho (Từ Đơn Mua Hàng #@Model.Id)</h1>
+        <p>
+            <b>Nhà cung cấp:</b> @Model.Supplier.Name<br>
+            <b>Ngày đặt hàng:</b> @Model.OrderDate.ToString("dd/MM/yyyy")<br>
+            <b>Ngày nhận hàng:</b> @DateTime.Now.ToString("dd/MM/yyyy")
+        </p>
+        <table>
+            <tr class="heading">
+                <td>Sản phẩm</td>
+                <td style="text-align:right;">Số lượng</td>
+                <td style="text-align:right;">Đơn giá</td>
+                <td style="text-align:right;">Thành tiền</td>
+            </tr>
+            @foreach (var item in Model.OrderDetails)
+            {
+                <tr class="item">
+                    <td>@item.Product.Name</td>
+                    <td style="text-align:right;">@item.Quantity</td>
+                    <td style="text-align:right;">@item.UnitPrice.ToString("N0") VND</td>
+                    <td style="text-align:right;">@((item.Quantity * item.UnitPrice).ToString("N0")) VND</td>
+                </tr>
+            }
+        </table>
+    </div>
+</body>
+</html>

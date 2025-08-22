@@ -1,0 +1,140 @@
+﻿@model WebAppERP.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Dashboard</h1>
+</div>
+
+@* Phần hiển thị cho tất cả nhân viên *@
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-header">Đơn nghỉ phép của tôi</div>
+            <div class="card-body">
+                <h5 class="card-title">@Model.MyPendingLeaveRequests</h5>
+                <p class="card-text">Đơn đang chờ duyệt.</p>
+                <a asp-controller="LeaveRequests" asp-action="Index" class="text-white">Xem chi tiết &rarr;</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@* Phần hiển thị chỉ dành cho Admin *@
+@if (User.IsInRole("Admin"))
+{
+    <h2 class="h3">Phân tích Kinh doanh</h2>
+    <div class="row">
+        <div class="col-md-12">
+            <canvas id="salesChart"></canvas>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <canvas id="topProductsChart"></canvas>
+        </div>
+    </div>
+    <hr class="my-4" />
+    <h2 class="h3">Tổng quan hệ thống (Admin)</h2>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-header">Doanh thu</div>
+                <div class="card-body">
+                    <h5 class="card-title">@Model.TotalRevenue.ToString("N0") VND</h5>
+                    <p class="card-text">Tổng doanh thu đã hoàn thành.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info mb-3">
+                <div class="card-header">Đơn hàng</div>
+                <div class="card-body">
+                    <h5 class="card-title">@Model.TotalSalesOrders</h5>
+                    <p class="card-text">Tổng số đơn hàng đã tạo.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-secondary mb-3">
+                <div class="card-header">Người dùng</div>
+                <div class="card-body">
+                    <h5 class="card-title">@Model.TotalUsers</h5>
+                    <p class="card-text">Tổng số tài khoản trong hệ thống.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-header">Phê duyệt</div>
+                <div class="card-body">
+                    <h5 class="card-title">@Model.PendingLeaveRequests</h5>
+                    <p class="card-text">Đơn nghỉ phép cần duyệt.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Chỉ chạy script nếu người dùng là Admin
+            if ($('#salesChart').length) {
+
+                // 1. Biểu đồ Doanh thu (Line Chart) - Đã có
+                $.ajax({
+                    url: "/Home/GetSalesDataForChart",
+                    success: function (data) {
+                        const chartData = {
+                            labels: data.map(item => item.month),
+                            datasets: [{
+                                label: 'Doanh thu (VND)',
+                                data: data.map(item => item.total),
+                                backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                                borderColor: 'rgba(0, 123, 255, 1)',
+                                borderWidth: 1
+                            }]
+                        };
+                        const ctx = document.getElementById('salesChart').getContext('2d');
+                        new Chart(ctx, { type: 'line', data: chartData });
+                    }
+                });
+
+                // 2. Biểu đồ Tồn kho (Doughnut Chart) - Mới
+                $.ajax({
+                    url: "/Home/GetInventoryStatus",
+                    success: function (data) {
+                        const chartData = {
+                            labels: ['Thành phẩm', 'Nguyên vật liệu'],
+                            datasets: [{
+                                data: [data.finishedGoods, data.rawMaterials],
+                                backgroundColor: ['rgb(25, 135, 84)', 'rgb(255, 193, 7)'],
+                            }]
+                        };
+                        const ctx = document.getElementById('inventoryChart').getContext('2d');
+                        new Chart(ctx, { type: 'doughnut', data: chartData });
+                    }
+                });
+
+                // 3. Biểu đồ Top Sản phẩm Bán chạy (Bar Chart) - Mới
+                $.ajax({
+                    url: "/Home/GetTopSellingProducts",
+                    success: function (data) {
+                        const chartData = {
+                            labels: data.map(item => item.productName),
+                            datasets: [{
+                                label: 'Số lượng đã bán',
+                                data: data.map(item => item.totalQuantity),
+                                backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                            }]
+                        };
+                        const ctx = document.getElementById('topProductsChart').getContext('2d');
+                        new Chart(ctx, { type: 'bar', data: chartData });
+                    }
+                });
+            }
+        });
+    </script>
+}

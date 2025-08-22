@@ -1,0 +1,89 @@
+﻿@model WebAppERP.ViewModels.MaterialIssueViewModel
+@using WebAppERP.Models
+
+@{
+    ViewData["Title"] = "Xử lý Yêu cầu Vật tư PL-" + Model.MaterialRequisitionId;
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr />
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div>
+    <h4>Thông tin Phiếu yêu cầu</h4>
+    <dl class="row">
+        <dt class="col-sm-2">Lệnh sản xuất</dt>
+        <dd class="col-sm-10">
+            <a asp-controller="WorkOrders" asp-action="Details" asp-route-id="@Model.Requisition.WorkOrderId">LSX-@Model.Requisition.WorkOrderId</a>
+        </dd>
+        <dt class="col-sm-2">Sản phẩm</dt>
+        <dd class="col-sm-10">@Model.Requisition.WorkOrder.Product.Name</dd>
+        <dt class="col-sm-2">Ngày yêu cầu</dt>
+        <dd class="col-sm-10">@Model.Requisition.RequestDate.ToString("dd/MM/yyyy HH:mm")</dd>
+    </dl>
+</div>
+<hr />
+
+<h4>Chi tiết Vật tư Yêu cầu & Tồn kho</h4>
+<form asp-action="Issue" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="MaterialRequisitionId" />
+
+    <div class="table-responsive">
+        <table class="table table-sm">
+            <thead class="thead-light">
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.Details[0].ProductName)</th>
+                    <th class="text-end">@Html.DisplayNameFor(model => model.Details[0].QuantityRequired)</th>
+                    <th class="text-end">@Html.DisplayNameFor(model => model.Details[0].CurrentStock)</th>
+                    <th>@Html.DisplayNameFor(model => model.Details[0].SelectedLotId)</th>
+                    <th style="width: 15%;">@Html.DisplayNameFor(model => model.Details[0].QuantityToIssue)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Details.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            <input type="hidden" asp-for="Details[i].WorkOrderBOMId" />
+                            @Model.Details[i].ProductName
+                        </td>
+                        <td class="text-end">
+                            @Model.Details[i].QuantityRequired.ToString("N2") @Model.Details[i].UnitOfMeasure
+                        </td>
+                        <td class="text-end @(Model.Details[i].CurrentStock < Model.Details[i].QuantityRequired ? "text-danger fw-bold" : "")">
+                            @Model.Details[i].CurrentStock.ToString("N2")
+                        </td>
+                        <td>
+                            @if (Model.Details[i].IsLotTracked)
+                            {
+                                <select asp-for="Details[i].SelectedLotId" asp-items="Model.Details[i].AvailableLots" class="form-select form-select-sm">
+                                    <option value="">-- Chọn lô --</option>
+                                </select>
+                            }
+                        </td>
+                        <td>
+                            <input asp-for="Details[i].QuantityToIssue" class="form-control form-control-sm text-end" type="number" step="any" min="0" />
+                            <span asp-validation-for="Details[i].QuantityToIssue" class="text-danger"></span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="form-group mt-3">
+        <button type="submit" class="btn btn-success" onclick="return confirm('Bạn có chắc chắn muốn xuất kho với số lượng đã nhập?');">
+            <i class="bi bi-check-circle-fill me-2"></i>Xác nhận Xuất kho
+        </button>
+        <a asp-action="Index" class="btn btn-secondary">Quay lại Danh sách</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,137 @@
+﻿@model WebAppERP.Models.ProductionStage
+
+@{
+    ViewData["Title"] = "Tạo mới Công đoạn Sản xuất";
+}
+
+<h1 class="display-6">@ViewData["Title"]</h1>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="WorkshopId" class="control-label"></label>
+                <div class="input-group">
+                    <select asp-for="WorkshopId" class="form-control" asp-items="ViewBag.WorkshopId">
+                        <option value="">-- Chọn Phân xưởng --</option>
+                    </select>
+                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#addWorkshopModal">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+                </div>
+                <span asp-validation-for="WorkshopId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Sequence" class="control-label"></label>
+                <input asp-for="Sequence" class="form-control" />
+                <span asp-validation-for="Sequence" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ProcessingMethod" class="control-label"></label>
+                <select asp-for="ProcessingMethod" class="form-control" asp-items="Html.GetEnumSelectList<ProductionProcessingMethod>()"></select>
+                <span asp-validation-for="ProcessingMethod" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Tạo mới</button>
+                <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="addWorkshopModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Phân xưởng mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modalErrorAlert" class="alert alert-danger d-none"></div>
+                <div class="form-group">
+                    <label for="newWorkshopName" class="control-label">Tên Phân xưởng</label>
+                    <input type="text" id="newWorkshopName" class="form-control" />
+                </div>
+                <div class="form-group mt-2">
+                    <label for="newWorkshopDesc" class="control-label">Mô tả</label>
+                    <textarea id="newWorkshopDesc" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" id="btnSaveWorkshop" class="btn btn-primary">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(function () {
+            $('#btnSaveWorkshop').on('click', function () {
+                var newName = $('#newWorkshopName').val();
+                var newDesc = $('#newWorkshopDesc').val();
+                var errorAlert = $('#modalErrorAlert');
+
+                if (!newName) {
+                    errorAlert.text('Tên phân xưởng không được để trống.').removeClass('d-none');
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("CreateAjax", "Workshops")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ Name: newName, Description: newDesc }),
+                    success: function (result) {
+                        if (result.success) {
+                            var dropdown = $('#WorkshopId');
+
+                            dropdown.empty();
+                            dropdown.append($('<option>', { value: '', text: '-- Chọn Phân xưởng --' }));
+
+                            $.each(result.data, function (i, item) {
+                                dropdown.append($('<option>', {
+                                    value: item.id,
+                                    text: item.name
+                                }));
+                            });
+
+                            dropdown.val(result.newId);
+
+                            var modalElement = document.getElementById('addWorkshopModal');
+                            var modal = bootstrap.Modal.getInstance(modalElement);
+                             if (modal) {
+                                modal.hide();
+                            }
+
+                            $('#newWorkshopName').val('');
+                            $('#newWorkshopDesc').val('');
+                            errorAlert.addClass('d-none');
+                        } else {
+                            errorAlert.text(result.message).removeClass('d-none');
+                        }
+                    },
+                    error: function () {
+                        errorAlert.text('Đã xảy ra lỗi không mong muốn.').removeClass('d-none');
+                    }
+                });
+            });
+        });
+    </script>
+}

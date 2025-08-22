@@ -1,0 +1,59 @@
+﻿@model WebAppERP.ViewModels.MaterialRequisitionViewModel
+@{
+    ViewData["Title"] = "Tạo Phiếu Lĩnh Vật tư cho LSX #" + Model.WorkOrderId;
+}
+<h1>@ViewData["Title"]</h1>
+<h4>Sản phẩm: @Model.WorkOrder.Product.Name</h4>
+<hr />
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="WorkOrderId" />
+    <div class="table-responsive">
+        <table class="table">
+            <thead class="thead-light">
+                <tr>
+                    <th>Nguyên phụ liệu</th>
+                    <th class="text-end">Định mức Tổng</th>
+                    <th class="text-end">Đã lĩnh</th>
+                    <th class="text-end">Cần lĩnh thêm</th>
+                    <th style="width: 15%;">Số lượng lĩnh lần này</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Details.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            <input type="hidden" asp-for="Details[i].WorkOrderBOMId" />
+                            <input type="hidden" asp-for="Details[i].ProductName" />
+                            @Model.Details[i].ProductName
+                        </td>
+                        <td class="text-end">
+                            <input type="hidden" asp-for="Details[i].QuantityRequired" />
+                            @Model.Details[i].QuantityRequired.ToString("N2") @Model.Details[i].UnitOfMeasure
+                        </td>
+                        <td class="text-end">
+                            <input type="hidden" asp-for="Details[i].QuantityAlreadyIssued" />
+                            @Model.Details[i].QuantityAlreadyIssued.ToString("N2")
+                        </td>
+                        <td class="text-end text-primary fw-bold">
+                            @((Model.Details[i].QuantityRequired - Model.Details[i].QuantityAlreadyIssued).ToString("N2"))
+                        </td>
+                        <td>
+                            <input asp-for="Details[i].QuantityToRequest" class="form-control text-end" type="number" step="any" min="0" />
+                            <span asp-validation-for="Details[i].QuantityToRequest" class="text-danger"></span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="form-group mt-3">
+        <input type="submit" value="Gửi Yêu cầu" class="btn btn-success" />
+        <a asp-action="Manage" asp-route-workOrderId="@Model.WorkOrderId" class="btn btn-secondary">Hủy</a>
+    </div>
+</form>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

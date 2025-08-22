@@ -1,0 +1,93 @@
+﻿@model WebAppERP.Models.Yarn
+
+@{
+    ViewData["Title"] = "Chỉnh sửa Lô sợi #" + Model.ID;
+}
+
+<h1 class="display-6">@ViewData["Title"]</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="ID" />
+
+            <div class="form-group mb-3">
+                <label asp-for="WorkOrderId" class="control-label"></label>
+                <select asp-for="WorkOrderId" class="form-control" asp-items="@(ViewData["WorkOrderId"] as SelectList)">
+                    <option value="">-- Tùy chọn: Sản xuất tự do --</option>
+                </select>
+                <span asp-validation-for="WorkOrderId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ProductId" class="control-label"></label>
+                <select asp-for="ProductId" class="form-control" asp-items="@(ViewData["ProductId"] as SelectList)">
+                    <option value="">-- Chọn sản phẩm sợi --</option>
+                </select>
+                <span asp-validation-for="ProductId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="MachineId" class="control-label"></label>
+                <select asp-for="MachineId" class="form-control" asp-items="@(ViewData["MachineId"] as SelectList)">
+                    <option value="">-- Chọn máy sản xuất --</option>
+                </select>
+                <span asp-validation-for="MachineId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="OperatorId" class="control-label"></label>
+                <select asp-for="OperatorId" class="form-control" asp-items="@(ViewData["OperatorId"] as SelectList)">
+                    <option value="">-- Chọn công nhân --</option>
+                </select>
+                <span asp-validation-for="OperatorId" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="StockQuantity" class="form-label"></label>
+                    <input asp-for="StockQuantity" class="form-control" />
+                    <span asp-validation-for="StockQuantity" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="SpoolCount" class="form-label"></label>
+                    <input asp-for="SpoolCount" class="form-control" />
+                    <span asp-validation-for="SpoolCount" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label asp-for="GrossWeight" class="form-label"></label>
+                    <input asp-for="GrossWeight" class="form-control" />
+                    <span asp-validation-for="GrossWeight" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="NetWeight" class="form-label"></label>
+                    <input asp-for="NetWeight" class="form-control" />
+                    <span asp-validation-for="NetWeight" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="SpoolWeight" class="form-label"></label>
+                    <input asp-for="SpoolWeight" class="form-control" />
+                    <span asp-validation-for="SpoolWeight" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Lưu thay đổi
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Quay lại
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

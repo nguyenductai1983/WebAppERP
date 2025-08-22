@@ -1,0 +1,52 @@
+﻿@model WebAppERP.Models.WorkOrder
+
+@{
+    ViewData["Title"] = "Chỉnh sửa Lệnh sản xuất";
+}
+
+<h1 class="display-6">@ViewData["Title"]</h1>
+<h4>Lệnh sản xuất #@Model.Id</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Status" />
+            <input type="hidden" asp-for="Type" />
+            <input type="hidden" asp-for="CreationDate" />
+            <input type="hidden" asp-for="ParentWorkOrderId" />
+            <input type="hidden" asp-for="ProductionStageId" />
+
+            <div class="form-group mb-3">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="ProductId" class="control-label"></label>
+                <select asp-for="ProductId" class="form-control" asp-items="ViewBag.ProductId"></select>
+                <span asp-validation-for="ProductId" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="QuantityToProduce" class="control-label"></label>
+                <input asp-for="QuantityToProduce" class="form-control" />
+                <span asp-validation-for="QuantityToProduce" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="DueDate" class="control-label"></label>
+                <input asp-for="DueDate" class="form-control" type="date" />
+                <span asp-validation-for="DueDate" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,52 @@
+﻿@model WebAppERP.Models.ProductionLog
+
+@{
+    ViewData["Title"] = "Xác nhận Xóa";
+}
+
+<h1 class="display-6">@ViewData["Title"]</h1>
+<h3>Bạn có chắc chắn muốn xóa lần ghi nhận sản lượng này không?</h3>
+<p class="text-danger">Hành động này sẽ cập nhật lại tồn kho và tiến độ sản xuất.</p>
+
+<div class="alert alert-warning">
+    <h4>Thông tin bản ghi sẽ bị xóa</h4>
+    <hr>
+    <dl class="row">
+        <dt class="col-sm-3">
+            Lệnh sản xuất
+        </dt>
+        <dd class="col-sm-9">
+            #@Model.WorkOrderRouting.WorkOrder.Id - @Model.WorkOrderRouting.WorkOrder.Product.Name
+        </dd>
+        <dt class="col-sm-3">
+            Công đoạn
+        </dt>
+        <dd class="col-sm-9">
+            @Model.WorkOrderRouting.ProductionStage.Name
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Quantity)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Quantity)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Operator)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Operator.UserName)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.LogDate)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.LogDate)
+        </dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Xóa</button> |
+        <a asp-controller="WorkOrders" asp-action="Details" asp-route-id="@Model.WorkOrderRouting.WorkOrderId">Quay lại</a>
+    </form>
+</div>

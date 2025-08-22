@@ -1,0 +1,160 @@
+﻿@model WebAppERP.ViewModels.ProductionLogViewModel
+@using WebAppERP.Models
+@{
+    var routingInfo = Model.RoutingInfo;
+    ViewData["Title"] = $"Ghi nhận sản lượng - {routingInfo.ProductionStage.Name}";
+}
+
+<h1 class="display-6">@ViewData["Title"]</h1>
+<hr />
+
+@* Hiển thị thông tin chung của Lệnh sản xuất *@
+<div class="alert alert-light border">
+    <dl class="row mb-0">
+        <dt class="col-sm-3">Lệnh sản xuất:</dt>
+        <dd class="col-sm-9">#@routingInfo.WorkOrder.Id - @routingInfo.WorkOrder.Product.Name</dd>
+        <dt class="col-sm-3">Công đoạn:</dt>
+        <dd class="col-sm-9"><strong>@routingInfo.ProductionStage.Name</strong></dd>
+        <dt class="col-sm-3">Tiến độ hiện tại:</dt>
+        <dd class="col-sm-9">@routingInfo.QuantityProduced / @routingInfo.QuantityToProduce</dd>
+    </dl>
+</div>
+
+<div class="row">
+    <div class="col-lg-9">
+        <form asp-action="Log" method="post">
+            @* Hiển thị tất cả lỗi validation ở đầu form *@
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="WorkOrderRoutingId" />
+
+            @* ================================================================ *@
+            @* PHẦN 1: THÔNG TIN ĐẦU RA (Tạo hàng loạt)                        *@
+            @* ================================================================ *@
+            <h4 class="mt-4">1. Thông tin Đầu ra (Sản phẩm tạo thành)</h4>
+            <div class="card p-3 mb-3">
+                @{
+                    // Lấy model cho dòng output đầu tiên (và duy nhất trong kịch bản tạo hàng loạt)
+                    var outputModel = Model.Outputs.FirstOrDefault() ?? new WebAppERP.ViewModels.ProductionOutputViewModel();
+                }
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="@outputModel.NumberOfLotsToCreate" class="form-label"></label>
+                        <input type="number" name="Outputs[0].NumberOfLotsToCreate" value="1" class="form-control" />
+                        <span asp-validation-for="@outputModel.NumberOfLotsToCreate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                @* Hiển thị các ô nhập liệu đặc thù DỰA VÀO TÊN CÔNG ĐOẠN *@
+                <div class="row">
+                    @if (routingInfo.ProductionStage.Name == "Đùn Sợi")
+                    {
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Trọng lượng NW / xe (kg)</label>
+                            <input type="number" step="0.01" name="Outputs[0].Attributes[NetWeight]" class="form-control" required />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Trọng lượng GW / xe (kg)</label>
+                            <input type="number" step="0.01" name="Outputs[0].Attributes[GrossWeight]" class="form-control" required />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Số ống sợi / xe</label>
+                            <input type="number" name="Outputs[0].Attributes[SpoolCount]" class="form-control" required />
+                        </div>
+                    }
+                    else if (routingInfo.ProductionStage.Name == "Dệt")
+                    {
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Chiều dài / cây (mét)</label>
+                            <input type="number" step="0.01" name="Outputs[0].Attributes[Length]" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Khổ rộng (mét)</label>
+                            <input type="number" step="0.01" name="Outputs[0].Attributes[Width]" class="form-control" required />
+                        </div>
+                    }
+                    @* Thêm các 'else if' cho các công đoạn khác ở đây *@
+                </div>
+            </div>
+
+            @* ================================================================ *@
+            @* PHẦN 2: NGUYÊN VẬT LIỆU ĐÃ SỬ DỤNG (ĐẦU VÀO)                    *@
+            @* ================================================================ *@
+            <h4 class="mt-4">2. Nguyên vật liệu đã sử dụng (Đầu vào)</h4>
+            <div class="card p-3 mb-3">
+                @if (Model.Inputs.Any())
+                {
+                    @for (int i = 0; i < Model.Inputs.Count; i++)
+                    {
+                        var input = Model.Inputs[i];
+                        <div class="row align-items-end border-bottom pb-3 mb-3">
+                            <input type="hidden" asp-for="Inputs[i].WorkOrderBOMId" />
+                            <input type="hidden" asp-for="Inputs[i].IsLotTracked" />
+
+                            <div class="col-12 mb-2">
+                                <strong>@input.ComponentName</strong>
+                                <small class="text-muted">
+                                    (Cần: @input.RequiredQuantity / Đã dùng: @input.AlreadyConsumedQuantity @input.UnitOfMeasure)
+                                </small>
+                            </div>
+
+                            @if (input.IsLotTracked)
+                            {
+                                <div class="col-md-6">
+                                    <label asp-for="Inputs[i].SelectedLotId" class="form-label"></label>
+                                    <select asp-for="Inputs[i].SelectedLotId" asp-items="input.AvailableLots" class="form-select">
+                                        <option value="">-- Chọn lô --</option>
+                                    </select>
+                                    <span asp-validation-for="Inputs[i].SelectedLotId" class="text-danger"></span>
+                                </div>
+                            }
+
+                            <div class="col-md-6">
+                                <label asp-for="Inputs[i].QuantityToConsume" class="form-label"></label>
+                                <input type="number" step="0.01" asp-for="Inputs[i].QuantityToConsume" class="form-control" value="0" />
+                                <span asp-validation-for="Inputs[i].QuantityToConsume" class="text-danger"></span>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-info mb-0">Công đoạn này không yêu cầu nguyên vật liệu đầu vào.</div>
+                }
+            </div>
+
+            @* ================================================================ *@
+            @* PHẦN 3: THÔNG TIN CHUNG                                         *@
+            @* ================================================================ *@
+            <h4 class="mt-4">3. Thông tin chung</h4>
+            <div class="card p-3 mb-3">
+                <div class="form-group mb-3">
+                    <label asp-for="OperatorId" class="form-label"></label>
+                    <select asp-for="OperatorId" class="form-select" asp-items="ViewBag.OperatorId">
+                        <option value="">-- Chọn nhân viên --</option>
+                    </select>
+                    <span asp-validation-for="OperatorId" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="MachineId" class="form-label"></label>
+                    <select asp-for="MachineId" class="form-select" asp-items="ViewBag.MachineId">
+                        <option value="">-- Chọn máy móc --</option>
+                    </select>
+                    <span asp-validation-for="MachineId" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="Notes" class="form-label"></label>
+                    <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+
+            <div class="form-group mt-4">
+                <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-save me-2"></i>Lưu</button>
+                <a asp-controller="WorkOrders" asp-action="Details" asp-route-id="@routingInfo.WorkOrderId" class="btn btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

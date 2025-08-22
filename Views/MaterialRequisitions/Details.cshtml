@@ -1,0 +1,50 @@
+﻿@model WebAppERP.Models.MaterialRequisition
+
+@{
+    ViewData["Title"] = "Chi tiết Phiếu Lĩnh Vật tư PL-" + Model.Id;
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div>
+    <h4>Thông tin chung</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">Lệnh sản xuất</dt>
+        <dd class="col-sm-9"><a asp-controller="WorkOrders" asp-action="Details" asp-route-id="@Model.WorkOrderId">LSX-@Model.WorkOrderId</a></dd>
+
+        <dt class="col-sm-3">Sản phẩm</dt>
+        <dd class="col-sm-9">@Model.WorkOrder.Product.Name</dd>
+
+        <dt class="col-sm-3">Người yêu cầu</dt>
+        <dd class="col-sm-9">@Model.RequestedBy.UserName</dd>
+
+        <dt class="col-sm-3">Ngày yêu cầu</dt>
+        <dd class="col-sm-9">@Model.RequestDate.ToString("dd/MM/yyyy HH:mm")</dd>
+
+        <dt class="col-sm-3">Trạng thái</dt>
+        <dd class="col-sm-9">@Model.Status</dd>
+    </dl>
+</div>
+<hr />
+<h4>Chi tiết vật tư yêu cầu</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Vật tư</th>
+            <th class="text-end">Số lượng yêu cầu</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Details)
+        {
+            <tr>
+                <td>@item.WorkOrderBOM.Component.Name</td>
+                <td class="text-end">@item.QuantityRequested.ToString("N2") @item.WorkOrderBOM.Component.UnitOfMeasure</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div>
+    <a asp-action="Manage" asp-route-workOrderId="@Model.WorkOrderId" class="btn btn-secondary">Quay lại</a>
+</div>

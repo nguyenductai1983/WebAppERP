@@ -1,0 +1,70 @@
+﻿@model IEnumerable<WebAppERP.Models.SalesOrderDetail>
+
+@{
+    ViewData["Title"] = "Hoạch định Sản xuất";
+    var activeWorkOrders = ViewBag.ActiveWorkOrders as List<WorkOrder>;
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="row">
+    <div class="col-md-7">
+        <h3>Nhu cầu Sản xuất (Từ Đơn hàng)</h3>
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Đơn hàng #</th>
+                        <th>Sản phẩm cần sản xuất</th>
+                        <th class="text-center">Số lượng</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.SalesOrderId</td>
+                            <td>@item.Product.Name</td>
+                            <td class="text-center">@item.Quantity</td>
+                            <td>
+                                <form asp-action="CreateWorkOrderFromDemand" method="post">
+                                    <input type="hidden" name="productId" value="@item.ProductId" />
+                                    <input type="hidden" name="quantity" value="@item.Quantity" />
+                                    <input type="hidden" name="salesOrderId" value="@item.SalesOrderId" />
+                                    <button type="submit" class="btn btn-primary btn-sm">Lập kế hoạch</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <h3>Lịch trình Sản xuất (Lệnh đang chạy)</h3>
+        <div class="list-group">
+            @foreach (var wo in activeWorkOrders)
+            {
+                <a asp-controller="WorkOrders" asp-action="Details" asp-route-id="@wo.Id" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">@wo.Product.Name</h6>
+                        <small>Ngày hết hạn: @wo.DueDate.ToString("dd/MM/yy")</small>
+                    </div>
+                    <p class="mb-1">Lệnh SX #@wo.Id - Số lượng: @wo.QuantityToProduce</p>
+                    <small>Trạng thái: @wo.Status</small>
+                </a>
+            }
+        </div>
+    </div>
+</div>

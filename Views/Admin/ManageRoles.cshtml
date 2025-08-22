@@ -1,0 +1,32 @@
+﻿@model WebAppERP.Models.ManageUserRolesViewModel
+
+@{
+    ViewData["Title"] = "Quản lý Quyền";
+}
+
+<h2>Quản lý quyền cho người dùng: @Model.UserName</h2>
+
+<form method="post">
+    <input asp-for="UserId" type="hidden" />
+    <div class="card">
+        <div class="card-header">
+            Gán hoặc bỏ gán quyền
+        </div>
+        <div class="card-body">
+            @for (int i = 0; i < Model.Roles.Count; i++)
+            {
+                <div class="form-check m-1">
+                    <input type="hidden" asp-for="@Model.Roles[i].RoleName" />
+                    <input asp-for="@Model.Roles[i].IsSelected" class="form-check-input" />
+                    <label class="form-check-label" asp-for="@Model.Roles[i].IsSelected">
+                        @Model.Roles[i].RoleName
+                    </label>
+                </div>
+            }
+        </div>
+        <div class="card-footer">
+            <input type="submit" value="Lưu thay đổi" class="btn btn-primary" />
+            <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+        </div>
+    </div>
+</form>

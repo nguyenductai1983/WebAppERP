@@ -1,0 +1,58 @@
+﻿@model IEnumerable<WebAppERP.Models.ProductionLog>
+
+@{
+    ViewData["Title"] = "Nhật ký Sản xuất";
+    var routingInfo = ViewBag.RoutingInfo as WebAppERP.Models.WorkOrderRouting;
+}
+
+<h1 class="display-6">@ViewData["Title"]</h1>
+
+<div class="alert alert-light border">
+    <dl class="row mb-0">
+        <dt class="col-sm-3">Lệnh sản xuất:</dt>
+        <dd class="col-sm-9">#@routingInfo.WorkOrder.Id - @routingInfo.WorkOrder.Product.Name</dd>
+        <dt class="col-sm-3">Công đoạn:</dt>
+        <dd class="col-sm-9"><strong>@routingInfo.ProductionStage.Name</strong></dd>
+    </dl>
+</div>
+
+<p>
+    <a asp-action="Create" asp-route-routingId="@routingInfo.Id" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Ghi nhận sản lượng mới
+    </a>
+</p>
+
+<table class="table table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.LogDate)</th>
+            <th>@Html.DisplayNameFor(model => model.Quantity)</th>
+            <th>@Html.DisplayNameFor(model => model.Operator)</th>
+            <th>@Html.DisplayNameFor(model => model.Machine)</th>
+            <th>@Html.DisplayNameFor(model => model.Notes)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.LogDate)</td>
+                <td>@Html.DisplayFor(modelItem => item.Quantity)</td>
+                <td>@Html.DisplayFor(modelItem => item.Operator.UserName)</td>
+                <td>@Html.DisplayFor(modelItem => item.Machine.Name)</td>
+                <td>@Html.DisplayFor(modelItem => item.Notes)</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Sửa</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div>
+    <a asp-controller="WorkOrders" asp-action="Details" asp-route-id="@routingInfo.WorkOrderId" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Quay lại Chi tiết Lệnh sản xuất
+    </a>
+</div>

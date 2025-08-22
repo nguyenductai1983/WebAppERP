@@ -1,0 +1,38 @@
+﻿@model WebAppERP.Models.PurchaseOrder
+
+@{
+    ViewData["Title"] = "Tạo Đơn Mua Hàng";
+}
+
+<h1>@ViewData["Title"]</h1>
+<h4>Bước 1: Chọn nhà cung cấp</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="SupplierId" class="form-label"></label>
+                <select asp-for="SupplierId" class="form-select" asp-items="ViewBag.Suppliers">
+                    <option value="">-- Chọn nhà cung cấp --</option>
+                </select>
+                <span asp-validation-for="SupplierId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ExpectedDeliveryDate" class="form-label"></label>
+                <input asp-for="ExpectedDeliveryDate" class="form-control" />
+                <span asp-validation-for="ExpectedDeliveryDate" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Tạo và Thêm sản phẩm" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Quay lại danh sách</a>
+</div>

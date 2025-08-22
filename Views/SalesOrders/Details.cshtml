@@ -1,0 +1,132 @@
+﻿@model WebAppERP.Models.SalesOrder
+@using WebAppERP.Models
+
+@{ ViewData["Title"] = "Chi tiết Đơn hàng #" + Model.Id; }
+
+<h1>@ViewData["Title"]</h1>
+
+<hr />
+
+@if (Model.Status == OrderStatus.Pending)
+{
+<h4>Thêm sản phẩm vào đơn hàng</h4>
+                <form id="addProductForm" asp-action="AddProductToOrder" method="post" class="border p-3">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="salesOrderId" value="@Model.Id" />
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <label for="productId">Sản phẩm</label>
+                                <select name="productId" class="form-control" asp-items="ViewBag.Products"></select>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="quantity">Số lượng</label>
+                                <input type="number" name="quantity" class="form-control" value="1" min="1" />
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-md-6 form-group">
+                                    <label for="Color">Màu sắc</label>
+                                    <select name="Color" class="form-control" asp-items="ViewBag.Colors">
+                                        <option value="">-- Chọn màu --</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="GsmOrGlm">GSM / GLM</label>
+                                    <input type="number" name="GsmOrGlm" class="form-control" />
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="FabricWidth">Khổ vải (m)</label>
+                                    <input type="number" name="FabricWidth" class="form-control" step="0.01" />
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="Meterage">Số mét</label>
+                                    <input type="number" name="Meterage" class="form-control" />
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="QuantityPerBag">Số lượng / bao</label>
+                                    <input type="number" name="QuantityPerBag" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mt-2">
+                        <button id="btnAddProduct" type="submit" class="btn btn-primary">
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            Thêm sản phẩm
+                        </button>
+                    </div>
+                    <div id="formStatus" class="mt-2"></div>
+                </form>
+                                <hr />}
+
+<div id="orderDetailsContainer">
+    <partial name="_OrderDetailsTable" model="Model" />
+</div>
+
+<div class="mt-3">
+    <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            var addBtn = $('#btnAddProduct');
+            var formStatus = $('#formStatus');
+
+            $('#addProductForm').on('submit', function (e) {
+                e.preventDefault();
+                var form = $(this);
+
+                $.ajax({
+                    type: "POST",
+                    url: form.attr('action'),
+                    data: form.serialize(),
+                    beforeSend: function () {
+                        // Vô hiệu hóa nút bấm và hiển thị spinner
+                        addBtn.prop('disabled', true);
+                        addBtn.find('.spinner-border').removeClass('d-none');
+                        formStatus.html(''); // Xóa thông báo cũ
+                    },
+                    success: function (response) {
+                        $('#orderDetailsContainer').html(response);
+                        form.trigger("reset");
+                        formStatus.html('<div class="alert alert-success">Đã thêm sản phẩm thành công.</div>');
+                    },
+                    error: function (response) {
+                        formStatus.html('<div class="alert alert-danger">Đã xảy ra lỗi, vui lòng thử lại.</div>');
+                    },
+                    complete: function () {
+                        // Kích hoạt lại nút bấm và ẩn spinner
+                        addBtn.prop('disabled', false);
+                        addBtn.find('.spinner-border').addClass('d-none');
+                    }
+                });
+            });
+
+            $('#orderDetailsContainer').on('submit', '.delete-form', function (e) {
+                e.preventDefault();
+                if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi đơn hàng?')) {
+                    return;
+                }
+                var form = $(this);
+
+                $.ajax({
+                    type: "POST",
+                    url: form.attr('action'),
+                    data: form.serialize(),
+                    success: function (response) {
+                        $('#orderDetailsContainer').html(response);
+                        // Không cần reset form xóa
+                    },
+                    error: function (response) {
+                        alert("Đã xảy ra lỗi khi xóa, vui lòng thử lại.");
+                    }
+                });
+            });
+        });
+    </script>
+}

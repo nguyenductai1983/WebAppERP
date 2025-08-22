@@ -1,0 +1,97 @@
+﻿@model IEnumerable<WebAppERP.Models.LeaveRequest>
+
+@{
+    ViewData["Title"] = "Quản lý Đơn nghỉ phép";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<table class="table table-striped table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>
+                Nhân viên
+            </th>
+            <th>
+                Ngày bắt đầu
+            </th>
+            <th>
+                Ngày kết thúc
+            </th>
+            <th>
+                Lý do
+            </th>
+            <th>
+                Ngày gửi
+            </th>
+            <th class="text-center">
+                Trạng thái
+            </th>
+            <th class="text-center">Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @* Sử dụng thuộc tính điều hướng để lấy tên nhân viên *@
+                    @Html.DisplayFor(modelItem => item.RequestingEmployee.FullName)
+                </td>
+                <td>
+                    @item.StartDate.ToString("dd/MM/yyyy")
+                </td>
+                <td>
+                    @item.EndDate.ToString("dd/MM/yyyy")
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Reason)
+                </td>
+                <td>
+                    @item.RequestDate.ToString("dd/MM/yyyy")
+                </td>
+                <td class="text-center">
+                    @* Dùng badge của Bootstrap 5 để hiển thị trạng thái cho đẹp *@
+                    @if (item.Status == LeaveRequestStatus.Pending)
+                    {
+                        <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                    }
+                    else if (item.Status == LeaveRequestStatus.Approved)
+                    {
+                        <span class="badge bg-success">Đã duyệt</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Bị từ chối</span>
+                    }
+                </td>
+                <td class="text-center">
+                    @* Sửa lại điều kiện if ở đây *@
+                    @if (item.EndDate >= DateTime.Today)
+                    {
+                        <div class="btn-group" role="group">
+                            @* Nút Duyệt *@
+                            <form asp-action="Approve" method="post" class="d-inline">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button type="submit" class="btn btn-success btn-sm">Duyệt</button>
+                            </form>
+
+                            @* Nút Từ chối *@
+                            <form asp-action="Deny" method="post" class="d-inline ms-1">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button type="submit" class="btn btn-danger btn-sm">Từ chối</button>
+                            </form>
+
+                            @* Thêm nút Sửa (sẽ làm ở bước 2) *@
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-secondary btn-sm ms-1">Sửa</a>
+                        </div>
+                    }
+                    else if (item.Status == LeaveRequestStatus.Pending && item.EndDate < DateTime.Today)
+                    {
+                        <span class="badge bg-secondary">Đã quá hạn</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

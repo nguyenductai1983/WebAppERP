@@ -1,0 +1,81 @@
+﻿@model WebAppERP.Models.Shipment
+@using WebAppERP.Models
+
+@{
+    ViewData["Title"] = "Chi tiết Phiếu Xuất Kho PX-" + Model.Id;
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr />
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div>
+    <h4>Thông tin chung</h4>
+    <dl class="row">
+        <dt class="col-sm-2">Đơn hàng</dt>
+        <dd class="col-sm-10">
+            <a asp-controller="SalesOrders" asp-action="Details" asp-route-id="@Model.SalesOrderId">SO-@Model.SalesOrderId</a>
+        </dd>
+        <dt class="col-sm-2">Khách hàng</dt>
+        <dd class="col-sm-10">@Model.SalesOrder.Customer.Name</dd>
+        <dt class="col-sm-2">Ngày tạo phiếu</dt>
+        <dd class="col-sm-10">@Model.CreationDate.ToString("dd/MM/yyyy HH:mm")</dd>
+        <dt class="col-sm-2">Trạng thái</dt>
+        <dd class="col-sm-10">
+            @if (Model.Status == ShipmentStatus.Pending)
+            {<span class="badge badge-warning">@Model.Status</span> }
+        else
+        { <span class="badge badge-success">@Model.Status</span>}
+        </dd>
+        @if (Model.Status == ShipmentStatus.Shipped)
+        {
+            <dt class="col-sm-2">Ngày xuất kho</dt>
+            <dd class="col-sm-10">@Model.ShippedDate?.ToString("dd/MM/yyyy HH:mm")</dd>
+        }
+    </dl>
+</div>
+
+<hr />
+
+<h4>Chi tiết mặt hàng cần xuất</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Sản phẩm</th>
+            <th>Đơn vị tính</th>
+            <th class="text-right">Số lượng</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.ShipmentDetails)
+        {
+            <tr>
+                <td>@item.Product.Name</td>
+                <td>@item.Product.UnitOfMeasure</td>
+                <td class="text-right">@item.QuantityToShip</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<hr />
+<div class="mt-3">
+    @if (Model.Status == ShipmentStatus.Pending)
+    {
+        <form asp-action="ConfirmShipment" method="post">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-success" onclick="return confirm('Bạn có chắc chắn muốn xác nhận xuất kho cho phiếu này? Hành động này sẽ trừ tồn kho và không thể hoàn tác.');">
+                <i class="fas fa-check-circle"></i> Xác nhận Xuất Kho
+            </button>
+        </form>
+    }
+    <a asp-action="Index" class="btn btn-secondary ml-2">Quay lại Danh sách</a>
+</div>

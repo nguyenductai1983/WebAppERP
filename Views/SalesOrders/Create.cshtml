@@ -1,0 +1,45 @@
+﻿@model WebAppERP.Models.SalesOrder
+
+@{
+    ViewData["Title"] = "Tạo Đơn hàng mới";
+}
+
+<h1 class="display-6">@ViewData["Title"]</h1>
+<p class="text-muted">Tạo một đơn hàng mới. Sau khi tạo, bạn sẽ được chuyển đến trang chi tiết để thêm sản phẩm.</p>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="CustomerId" class="control-label"></label>
+
+                <!-- SỬA LẠI DÒNG NÀY TỪ ViewData.Customers SANG ViewBag.Customers -->
+                <select asp-for="CustomerId" class="form-control" asp-items="ViewBag.Customers">
+                    <option value="">-- Chọn khách hàng --</option>
+                </select>
+
+                <span asp-validation-for="CustomerId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ShippingAddress" class="control-label"></label>
+                <textarea asp-for="ShippingAddress" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="ShippingAddress" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Tạo mới và thêm sản phẩm
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">Quay lại danh sách</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

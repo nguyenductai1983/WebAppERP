@@ -1,0 +1,84 @@
+﻿@model WebAppERP.Models.Textile
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Textile</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ID" />
+            <div class="form-group">
+                <label asp-for="TextileTypeId" class="control-label"></label>
+                <select asp-for="TextileTypeId" class="form-control" asp-items="ViewBag.TextileTypeId"></select>
+                <span asp-validation-for="TextileTypeId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="MachineId" class="control-label"></label>
+                <select asp-for="MachineId" class="form-control" asp-items="ViewBag.MachineId"></select>
+                <span asp-validation-for="MachineId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="OperatorId" class="control-label"></label>
+                <select asp-for="OperatorId" class="form-control" asp-items="ViewBag.OperatorId"></select>
+                <span asp-validation-for="OperatorId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Code" class="control-label"></label>
+                <input asp-for="Code" class="form-control" />
+                <span asp-validation-for="Code" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ActualWidth" class="control-label"></label>
+                <input asp-for="ActualWidth" class="form-control" />
+                <span asp-validation-for="ActualWidth" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="InitialLength" class="control-label"></label>
+                <input asp-for="InitialLength" class="form-control" />
+                <span asp-validation-for="InitialLength" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="GrossWeight" class="control-label"></label>
+                <input asp-for="GrossWeight" class="form-control" />
+                <span asp-validation-for="GrossWeight" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NetWeight" class="control-label"></label>
+                <input asp-for="NetWeight" class="form-control" />
+                <span asp-validation-for="NetWeight" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="Quality" /> @Html.DisplayNameFor(model => model.Quality)
+                </label>
+            </div>
+            <div class="form-group">
+                <label asp-for="Created_at" class="control-label"></label>
+                <input asp-for="Created_at" class="form-control" />
+                <span asp-validation-for="Created_at" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Updated_at" class="control-label"></label>
+                <input asp-for="Updated_at" class="form-control" />
+                <span asp-validation-for="Updated_at" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

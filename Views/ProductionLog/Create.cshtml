@@ -1,0 +1,106 @@
+﻿@model WebAppERP.Models.ProductionLog
+
+@{
+    ViewData["Title"] = "Ghi nhận sản lượng";
+    // Lấy thông tin chi tiết về công đoạn đang thực hiện
+    var routingInfo = ViewBag.RoutingInfo as WebAppERP.Models.WorkOrderRouting;
+    // Lấy tên của công đoạn để quyết định hiển thị form nào
+    var stageName = ViewBag.StageName as string;
+}
+
+<h1 class="display-6">@ViewData["Title"]</h1>
+<hr />
+
+<div class="alert alert-light border">
+    <dl class="row mb-0">
+        <dt class="col-sm-3">Lệnh sản xuất:</dt>
+        <dd class="col-sm-9">#@routingInfo.WorkOrder.Id - @routingInfo.WorkOrder.Product.Name</dd>
+        <dt class="col-sm-3">Công đoạn:</dt>
+        <dd class="col-sm-9"><strong>@routingInfo.ProductionStage.Name</strong></dd>
+        <dt class="col-sm-3">Tiến độ hiện tại:</dt>
+        <dd class="col-sm-9">@routingInfo.QuantityProduced / @routingInfo.QuantityToProduce</dd>
+    </dl>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="WorkOrderRoutingId" />
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Quantity" class="control-label"></label>
+                    <input asp-for="Quantity" class="form-control" />
+                    <span asp-validation-for="Quantity" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="LogDate" class="control-label"></label>
+                    <input asp-for="LogDate" class="form-control" type="date" />
+                    <span asp-validation-for="LogDate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="OperatorId" class="control-label"></label>
+                <select asp-for="OperatorId" class="form-control" asp-items="ViewBag.OperatorId"></select>
+                <span asp-validation-for="OperatorId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="MachineId" class="control-label"></label>
+                <select asp-for="MachineId" class="form-control" asp-items="ViewBag.MachineId">
+                    <option value="">-- Không chọn máy --</option>
+                </select>
+            </div>
+
+            <hr />
+            <h4>Thông tin chi tiết cho công đoạn: <strong>@stageName</strong></h4>
+
+            @if (stageName == "Đùn Sợi")
+            {
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label>Trọng lượng NW</label>
+                        <input type="number" step="0.01" name="NetWeight" class="form-control" required />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label>Trọng lượng GW</label>
+                        <input type="number" step="0.01" name="GrossWeight" class="form-control" required />
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label>Số ống sợi</label>
+                        <input type="number" name="SpoolCount" class="form-control" required />
+                    </div>
+                </div>
+            }
+            else if (stageName == "Dệt")
+            {
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Số mét dài</label>
+                        <input type="number" step="0.01" name="Length" class="form-control" required />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Khổ rộng thực tế</label>
+                        <input type="number" step="0.01" name="Width" class="form-control" required />
+                    </div>
+                </div>
+            }
+
+            <div class="form-group mb-3">
+                <label asp-for="Notes" class="control-label"></label>
+                <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Lưu</button>
+                <a asp-controller="WorkOrders" asp-action="Details" asp-route-id="@routingInfo.WorkOrderId" class="btn btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

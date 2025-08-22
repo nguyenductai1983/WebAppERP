@@ -1,0 +1,88 @@
+﻿@model WebAppERP.Models.PurchaseOrder
+
+@{
+    ViewData["Title"] = "Chi tiết Đơn Mua Hàng #" + Model.Id;
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<h4>Thông tin chung</h4>
+<hr />
+<dl class="row">
+    <dt class="col-sm-3">Nhà cung cấp:</dt>
+    <dd class="col-sm-9">@Model.Supplier.Name</dd>
+    <dt class="col-sm-3">Ngày đặt hàng:</dt>
+    <dd class="col-sm-9">@Model.OrderDate.ToString("dd/MM/yyyy")</dd>
+    <dt class="col-sm-3">Ngày dự kiến nhận:</dt>
+    <dd class="col-sm-9">@Model.ExpectedDeliveryDate?.ToString("dd/MM/yyyy")</dd>
+    <dt class="col-sm-3">Trạng thái:</dt>
+    <dd class="col-sm-9"><span class="badge bg-primary">@Model.Status</span></dd>
+</dl>
+
+@if (Model.Status != PurchaseOrderStatus.Completed)
+{
+<form asp-action="ReceiveOrder" method="post">
+    <input type="hidden" name="id" value="@Model.Id" />
+    <button type="submit" class="btn btn-success mb-3" onclick="return confirm('Bạn có chắc chắn muốn xác nhận đã nhận đủ hàng cho đơn này? Hành động này sẽ cập nhật số lượng tồn kho và không thể hoàn tác.');">
+        Xác nhận đã nhận hàng
+    </button>
+    <a asp-action="PrintReceipt" asp-route-id="@Model.Id" class="btn btn-info" target="_blank">In Phiếu Nhập Kho</a>
+</form>
+}
+
+@if (Model.Status != PurchaseOrderStatus.Completed)
+{
+    <h4>Thêm sản phẩm vào đơn</h4>
+    <div class="card card-body mb-3">
+        <form asp-action="AddProductToPurchaseOrder" method="post" class="row gx-3 align-items-end">
+            <input type="hidden" name="purchaseOrderId" value="@Model.Id" />
+            <div class="col-md-5">
+                <label for="productId" class="form-label">Sản phẩm</label>
+                <select name="productId" class="form-select" asp-items="@ViewBag.Products" required></select>
+            </div>
+            <div class="col-md-3">
+                <label for="quantity" class="form-label">Số lượng</label>
+                <input type="number" name="quantity" class="form-control" value="1" min="1" required />
+            </div>
+            <div class="col-md-3">
+                <label for="unitPrice" class="form-label">Đơn giá mua</label>
+                <input type="number" name="unitPrice" class="form-control" value="0" min="0" step="1000" required />
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary">Thêm</button>
+            </div>
+        </form>
+    </div>
+}
+
+
+<h4 class="mt-4">Chi tiết đơn hàng</h4>
+<table class="table">
+    <thead>
+        <tr><th>Sản phẩm</th><th>Số lượng</th><th>Đơn giá mua</th><th>Thành tiền</th></tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderDetails)
+        {
+            <tr>
+                <td>@item.Product.Name</td>
+                <td>@item.Quantity</td>
+                <td>@item.UnitPrice.ToString("N0") VND</td>
+                <td>@((item.Quantity * item.UnitPrice).ToString("N0")) VND</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div>
+    <a asp-action="Index">Quay lại danh sách</a>
+</div>

@@ -1,0 +1,212 @@
+﻿@model WebAppERP.Models.Machine
+
+@{
+    ViewData["Title"] = "Tạo Máy mới";
+}
+
+<h1 class="display-6">@ViewData["Title"]</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="MachineTypeId" class="control-label"></label>
+                <div class="input-group">
+                    <select asp-for="MachineTypeId" class="form-control" asp-items="@(ViewData["MachineTypeId"] as SelectList)">
+                        <option value="">-- Chọn loại máy --</option>
+                    </select>
+                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#addMachineTypeModal">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+                </div>
+                <span asp-validation-for="MachineTypeId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="WorkshopId" class="control-label"></label>
+                <div class="input-group">
+                    <select asp-for="WorkshopId" class="form-control" asp-items="@(ViewData["WorkshopId"] as SelectList)">
+                        <option value="">-- Chọn Phân xưởng --</option>
+                    </select>
+                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#addWorkshopModal">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+                </div>
+                <span asp-validation-for="WorkshopId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Status" class="control-label"></label>
+                <input asp-for="Status" class="form-control" />
+                <span asp-validation-for="Status" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Tạo mới" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="addMachineTypeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Loại máy mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modalMachineTypeErrorAlert" class="alert alert-danger d-none"></div>
+                <div class="form-group">
+                    <label for="newMachineTypeName" class="control-label">Tên Loại máy</label>
+                    <input type="text" id="newMachineTypeName" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="newMachineTypeStageId" class="control-label">Sử dụng cho Công đoạn</label>
+                    <select id="newMachineTypeStageId" class="form-select" asp-items="@(ViewData["ProductionStageId"] as SelectList)">
+                        <option value="">-- Chọn công đoạn --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" id="btnSaveMachineType" class="btn btn-primary">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addWorkshopModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Phân xưởng mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modalWorkshopErrorAlert" class="alert alert-danger d-none"></div>
+                <div class="form-group">
+                    <label for="newWorkshopName" class="control-label">Tên Phân xưởng</label>
+                    <input type="text" id="newWorkshopName" class="form-control" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" id="btnSaveWorkshop" class="btn btn-primary">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        $(function () {
+            // ==========================================================
+            // Script cho tạo nhanh Loại Máy
+            // ==========================================================
+            $('#btnSaveMachineType').on('click', function () {
+                var newName = $('#newMachineTypeName').val().trim();
+                var stageId = parseInt($('#newMachineTypeStageId').val(), 10);
+                var errorAlert = $('#modalMachineTypeErrorAlert');
+
+                // Client-side validation
+                if (!newName || !stageId) {
+                    errorAlert.text('Tên loại máy và công đoạn không được để trống.').removeClass('d-none');
+                    return;
+                }
+                errorAlert.addClass('d-none');
+
+                $.ajax({
+                    url: '@Url.Action("CreateAjax", "MachineTypes")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        Name: newName,
+                        ProductionStageId: stageId
+                    }),
+                    success: function (result) {
+                        if (result.success) {
+                            var dropdown = $('#MachineTypeId');
+                            // Xóa các lựa chọn cũ và điền lại danh sách mới từ server
+                            dropdown.empty();
+                            dropdown.append($('<option>', { value: '', text: '-- Chọn loại máy --' }));
+                            $.each(result.data, function (i, item) {
+                                dropdown.append($('<option>', { value: item.id, text: item.name }));
+                            });
+
+                            // Tự động chọn loại máy vừa được tạo
+                            dropdown.val(result.newId);
+
+                            // Ẩn modal và dọn dẹp form
+                            var modal = bootstrap.Modal.getInstance(document.getElementById('addMachineTypeModal'));
+                            modal.hide();
+                            $('#newMachineTypeName').val('');
+                            $('#newMachineTypeStageId').val('');
+                        } else {
+                            errorAlert.text(result.message).removeClass('d-none');
+                        }
+                    },
+                    error: function() {
+                        errorAlert.text('Đã có lỗi xảy ra khi kết nối tới server.').removeClass('d-none');
+                    }
+                });
+            });
+
+            // ==========================================================
+            // Script cho tạo nhanh Phân Xưởng
+            // ==========================================================
+            $('#btnSaveWorkshop').on('click', function () {
+                var newName = $('#newWorkshopName').val().trim();
+                var errorAlert = $('#modalWorkshopErrorAlert');
+
+                if (!newName) {
+                    errorAlert.text('Tên Phân xưởng không được để trống.').removeClass('d-none');
+                    return;
+                }
+                errorAlert.addClass('d-none');
+
+                $.ajax({
+                    url: '@Url.Action("CreateAjax", "Workshops")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        Name: newName
+                    }),
+                    success: function (result) {
+                        if (result.success) {
+                            var dropdown = $('#WorkshopId');
+                            dropdown.empty();
+                            dropdown.append($('<option>', { value: '', text: '-- Chọn Phân xưởng --' }));
+                            $.each(result.data, function (i, item) {                                
+                                dropdown.append($('<option>', { value: item.id, text: item.name }));
+                            });
+
+                            dropdown.val(result.newId);
+
+                            var modal = bootstrap.Modal.getInstance(document.getElementById('addWorkshopModal'));
+                            modal.hide();
+                            $('#newWorkshopName').val('');
+                        } else {
+                            errorAlert.text(result.message).removeClass('d-none');
+                        }
+                    },
+                    error: function() {
+                        errorAlert.text('Đã có lỗi xảy ra khi kết nối tới server.').removeClass('d-none');
+                    }
+                });
+            });
+
+        });
+    </script>
+}
